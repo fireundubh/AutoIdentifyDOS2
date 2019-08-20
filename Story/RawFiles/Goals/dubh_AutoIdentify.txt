@@ -7,6 +7,8 @@ KBSECTION
 IF
 ItemTemplateOpening(_, _Item, _Char)
 AND
+NOT DoorIsOpening(_Item, _)
+AND
 ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
 AND
 CharacterIsPlayer(_Char, 1)
