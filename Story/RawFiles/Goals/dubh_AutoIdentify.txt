@@ -5,58 +5,26 @@ INITSECTION
 KBSECTION
 //REGION When a container is opening, flag and identify items.
 IF
-ItemTemplateOpening(_, _Item, _Char)
+ItemTemplateOpening(_Template, _Item, _Char)
 AND
-NOT DoorIsOpening(_Item, _)
-AND
-ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
+ItemIsContainer(_Item, 1)
 AND
 CharacterIsPlayer(_Char, 1)
 AND
-FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
 AND
-ItemIsContainer(_Item, _IsContainer)
+ContainerGetGoldValue(_Item, _GoldValue)
+AND
+_GoldValue > 0
+AND
+FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
 THEN
-FIRE_LORE_Identify(_Char, _Item, _IsContainer);
+FIRE_LORE_Identify(_Char, _Item, 1);
 //END_REGION
 
 //REGION When an item is added to a character, flag and identify item.
 IF
 ItemAddedToCharacter(_Item, _Char)
-AND
-ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
-AND
-CharacterIsPlayer(_Char, 1)
-AND
-FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
-AND
-ItemIsContainer(_Item, _IsContainer)
-THEN
-FIRE_LORE_Identify(_Char, _Item, _IsContainer);
-//END_REGION
-
-//REGION When a player picks up item, flag and identify item.
-PROC
-ProcBlockPickupOfItem((CHARACTERGUID)_Char, (ITEMGUID)_Item)
-AND
-NOT DB_CustomPickupItemResponse(_Char,_Item, 0) // The item is not blocked
-AND
-ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
-AND
-CharacterIsPlayer(_Char, 1)
-AND
-FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
-AND
-ItemIsContainer(_Item, _IsContainer)
-THEN
-FIRE_LORE_Identify(_Char, _Item, _IsContainer);
-//END_REGION
-
-//REGION When a player moves an item, flag and identify item.
-PROC
-ProcBlockMoveOfItem((CHARACTERGUID)_Char,(ITEMGUID)_Item)
-AND
-NOT DB_CustomMoveItemResponse(_Char, _Item, 0)
 AND
 ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
 AND
@@ -109,7 +77,7 @@ MoveAllItemsTo(_Backpack, _Char, 0, 0, 0);
 ProcObjectTimer(_Backpack, "FIRE_Timers_RemovedIdentifyContainer", 250);
 
 PROC
-ProcObjectTimerFinished((ITEMGUID)_Backpack, "FIRE_Timers_IdentifyContainer")
+ProcObjectTimerFinished((ITEMGUID)_Backpack, "FIRE_Timers_RemovedIdentifyContainer")
 THEN
 ItemRemove(_Backpack);
 
@@ -122,7 +90,6 @@ ContainerIdentifyAll(_Item);
 ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
 InventoryLaunchIterator(_Item, "FIRE_LORE_FlagAndIdentify", "");
 //END_REGION
-
 
 //REGION Events
 IF
@@ -139,7 +106,6 @@ GetInventoryOwner(_Item, (CHARACTERGUID)_Owner)
 THEN
 FIRE_LORE_Identify(_Owner, _Item, 1);
 //END_REGION
-
 
 //REGION Queries
 QRY
