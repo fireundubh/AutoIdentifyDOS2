@@ -1,0 +1,56 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+
+KBSECTION
+//REGION When player with Loremaster 5 is opening owned container, identify all items.
+IF
+ItemTemplateOpening(_, (ITEMGUID)_Container, (CHARACTERGUID)_Character)
+AND
+DB_IsPlayer(_Character)
+AND
+ItemIsContainer(_Container, 1)
+AND
+CharacterGetAbility(_Character, "Loremaster", _Value)
+AND
+_Value >= 5
+THEN
+ContainerIdentifyAll((ITEMGUID)_Container);
+//END_REGION
+
+//REGION When player with Loremaster 5 adds item to owned container, identify item.
+IF
+ItemAddedToContainer((ITEMGUID)_Item, (ITEMGUID)_Container)
+AND
+DB_IsPlayer(_Character)
+AND
+ItemIsContainer(_Container, 1)
+AND
+ItemGetOwner(_Container, _Character)
+AND
+CharacterGetAbility(_Character, "Loremaster", _Value)
+AND
+_Value >= 5
+THEN
+ItemSetKnown((ITEMGUID)_Item, 1);
+//END_REGION
+
+//REGION When player trades item, identify item in trader inventory, if trader has Loremaster 5.
+IF
+ItemMovedFromTo((ITEMGUID)_Item, (GUIDSTRING)_FromObject, (GUIDSTRING)_ToObject, 1)
+AND
+DB_IsPlayer(_Player)
+AND
+GetInventoryOwner(_Item, _Owner)
+AND
+_Owner != _Player
+AND
+CharacterGetAbility((CHARACTERGUID)_Owner, "Loremaster", _Value)
+AND
+_Value >= 5
+THEN
+ItemSetKnown((ITEMGUID)_Item, 1);
+//END_REGION
+EXITSECTION
+
+ENDEXITSECTION
