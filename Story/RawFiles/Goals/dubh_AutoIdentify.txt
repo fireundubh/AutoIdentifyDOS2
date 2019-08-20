@@ -3,53 +3,173 @@ SubGoalCombiner SGC_AND
 INITSECTION
 
 KBSECTION
-//REGION When player with Loremaster 5 is opening owned container, identify all items.
+//REGION When a container is opening, flag and identify items.
 IF
-ItemTemplateOpening(_, (ITEMGUID)_Container, (CHARACTERGUID)_Character)
+ItemTemplateOpening(_, _Item, _Char)
 AND
-DB_IsPlayer(_Character)
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
 AND
-ItemIsContainer(_Container, 1)
+CharacterIsPlayer(_Char, 1)
 AND
-CharacterGetAbility(_Character, "Loremaster", _Value)
+FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
 AND
-_Value >= 5
+ItemIsContainer(_Item, _IsContainer)
 THEN
-ContainerIdentifyAll((ITEMGUID)_Container);
+FIRE_LORE_Identify(_Char, _Item, _IsContainer);
 //END_REGION
 
-//REGION When player with Loremaster 5 adds item to owned container, identify item.
+//REGION When an item is added to a character, flag and identify item.
 IF
-ItemAddedToContainer((ITEMGUID)_Item, (ITEMGUID)_Container)
+ItemAddedToCharacter(_Item, _Char)
 AND
-DB_IsPlayer(_Character)
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
 AND
-ItemIsContainer(_Container, 1)
+CharacterIsPlayer(_Char, 1)
 AND
-ItemGetOwner(_Container, _Character)
+FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
 AND
-CharacterGetAbility(_Character, "Loremaster", _Value)
-AND
-_Value >= 5
+ItemIsContainer(_Item, _IsContainer)
 THEN
-ItemSetKnown((ITEMGUID)_Item, 1);
+FIRE_LORE_Identify(_Char, _Item, _IsContainer);
 //END_REGION
 
-//REGION When player trades item, identify item in trader inventory, if trader has Loremaster 5.
+//REGION When a player picks up item, flag and identify item.
+PROC
+ProcBlockPickupOfItem((CHARACTERGUID)_Char, (ITEMGUID)_Item)
+AND
+NOT DB_CustomPickupItemResponse(_Char,_Item, 0) // The item is not blocked
+AND
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
+AND
+CharacterIsPlayer(_Char, 1)
+AND
+FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
+AND
+ItemIsContainer(_Item, _IsContainer)
+THEN
+FIRE_LORE_Identify(_Char, _Item, _IsContainer);
+//END_REGION
+
+//REGION When a player moves an item, flag and identify item.
+PROC
+ProcBlockMoveOfItem((CHARACTERGUID)_Char,(ITEMGUID)_Item)
+AND
+NOT DB_CustomMoveItemResponse(_Char, _Item, 0)
+AND
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
+AND
+CharacterIsPlayer(_Char, 1)
+AND
+FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
+AND
+ItemIsContainer(_Item, _IsContainer)
+THEN
+FIRE_LORE_Identify(_Char, _Item, _IsContainer);
+//END_REGION
+
+//REGION Procedures
+PROC
+FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 0)
+AND
+String(_Item, _Str)
+THEN
+ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
+FIRE_LORE_AddToIdentifyContainer(_Char, _Item);
+
+PROC
+FIRE_LORE_AddToIdentifyContainer((CHARACTERGUID)_Char, (ITEMGUID)_Item)
+AND
+NOT DB_FIRE_LORE_Temp_IdentifyHolder(_Char, _)
+AND
+GetPosition(_Char, _x, _y, _z)
+AND
+CreateItemTemplateAtPosition("CONT_Humans_Backpack_Merchant_A_360e3e11-c7f8-4281-848a-596e37df884b", _x, _y, _z, _Backpack)
+THEN
+DB_FIRE_LORE_Temp_IdentifyHolder(_Char, _Backpack);
+ItemSetOwner(_Backpack, _Char);
+ProcObjectTimer(_Backpack, "FIRE_Timers_IdentifyContainer", 250);
+
+PROC
+FIRE_LORE_AddToIdentifyContainer((CHARACTERGUID)_Char, (ITEMGUID)_Item)
+AND
+DB_FIRE_LORE_Temp_IdentifyHolder(_Char, _Backpack)
+THEN
+ItemToInventory(_Item, _Backpack);
+
+PROC
+ProcObjectTimerFinished((ITEMGUID)_Backpack, "FIRE_Timers_IdentifyContainer")
+AND
+DB_FIRE_LORE_Temp_IdentifyHolder(_Char, _Backpack)
+THEN
+NOT DB_FIRE_LORE_Temp_IdentifyHolder(_Char, _Backpack);
+ContainerIdentifyAll(_Backpack);
+MoveAllItemsTo(_Backpack, _Char, 0, 0, 0);
+ProcObjectTimer(_Backpack, "FIRE_Timers_RemovedIdentifyContainer", 250);
+
+PROC
+ProcObjectTimerFinished((ITEMGUID)_Backpack, "FIRE_Timers_IdentifyContainer")
+THEN
+ItemRemove(_Backpack);
+
+PROC
+FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 1)
+AND
+String(_Item, _Str)
+THEN
+ContainerIdentifyAll(_Item);
+ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
+InventoryLaunchIterator(_Item, "FIRE_LORE_FlagAndIdentify", "");
+//END_REGION
+
+
+//REGION Events
 IF
-ItemMovedFromTo((ITEMGUID)_Item, (GUIDSTRING)_FromObject, (GUIDSTRING)_ToObject, 1)
+StoryEvent((ITEMGUID)_Item, "FIRE_LORE_FlagAndIdentify")
+THEN
+ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
+
+IF
+StoryEvent((ITEMGUID)_Item, "FIRE_LORE_FlagAndIdentify")
+AND
+ItemIsContainer(_Item, 1)
+AND
+GetInventoryOwner(_Item, (CHARACTERGUID)_Owner)
+THEN
+FIRE_LORE_Identify(_Owner, _Item, 1);
+//END_REGION
+
+
+//REGION Queries
+QRY
+FIRE_LORE_PartyHasHighEnoughLoremaster((CHARACTERGUID)_PartyMember, (INTEGER)_MinLoremaster)
+AND
+CharacterGetAbility(_PartyMember, "Loremaster", _Value)
+AND
+_Value >= _MinLoremaster
+THEN
+DB_FIRE_LORE_LoremasterSuccess(_PartyMember);
+
+QRY
+FIRE_LORE_PartyHasHighEnoughLoremaster((CHARACTERGUID)_PartyMember, (INTEGER)_MinLoremaster)
+AND
+NOT DB_FIRE_LORE_LoremasterSuccess(_PartyMember)
 AND
 DB_IsPlayer(_Player)
 AND
-GetInventoryOwner(_Item, _Owner)
+CharacterIsInPartyWith(_PartyMember, _Player, 1)
 AND
-_Owner != _Player
+CharacterGetAbility(_Player, "Loremaster", _Value)
 AND
-CharacterGetAbility((CHARACTERGUID)_Owner, "Loremaster", _Value)
-AND
-_Value >= 5
+_Value >= _MinLoremaster
 THEN
-ItemSetKnown((ITEMGUID)_Item, 1);
+DB_FIRE_LORE_LoremasterSuccess(_PartyMember);
+
+QRY
+FIRE_LORE_PartyHasHighEnoughLoremaster((CHARACTERGUID)_PartyMember, (INTEGER)_MinLoremaster)
+AND
+DB_FIRE_LORE_LoremasterSuccess(_PartyMember)
+THEN
+NOT DB_FIRE_LORE_LoremasterSuccess(_PartyMember);
 //END_REGION
 EXITSECTION
 
