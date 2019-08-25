@@ -3,12 +3,13 @@ SubGoalCombiner SGC_AND
 INITSECTION
 
 KBSECTION
-//REGION FlagToTag
+//REGION Flag_To_Tag
 IF
 GameStarted(_,_)
 AND
 GlobalGetFlag("FIRE_LORE_Update_FlagToTag", 0)
 THEN
+DebugBreak("[FIRE:LORE:Updater] Updating [FIRE_LORE_Identified] flagged items to tag.");
 //Cancel timers to "restart" them if the game is saved/reloaded before they finish.
 TimerCancel("FIRE_LORE_RunUpdater");
 TimerCancel("FIRE_LORE_CompleteUpdaterScript");
@@ -31,6 +32,7 @@ TimerLaunch("FIRE_LORE_CompleteUpdaterScript", 250);
 IF
 TimerFinished("FIRE_LORE_CompleteUpdaterScript")
 THEN
+DebugBreak("[FIRE:LORE:Updater] Update complete.");
 GoalCompleted;
 //END_REGION
 EXITSECTION
