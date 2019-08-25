@@ -1,0 +1,26 @@
+INIT
+
+EVENTS
+
+EVENT FIRE_LORE_GetRarity
+VARS
+	CHARACTER:_Char
+	ITEM:_Item
+	FIXEDSTRING:_Rarity
+ON
+	OnCharacterItemEvent(_Char, _Item, "FIRE_LORE_CheckRarity")
+ACTIONS
+IF "c1&!c2&!c3"
+	ItemGetItemType(_Item, _Rarity)
+	IsEqual(_Rarity, "Unique")
+	IsEqual(_Rarity, "Common")
+THEN
+	CharacterItemEvent(_Char, _Item, "FIRE_LORE_IdentifyItem")
+ENDIF
+/* Debug
+IF "c1"
+	ItemGetItemType(_Item, _Rarity)
+THEN
+	StatusText(_Char, _Rarity)
+ENDIF
+*/
