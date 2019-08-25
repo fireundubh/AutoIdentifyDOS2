@@ -5,17 +5,7 @@
     <region id="Config">
         <node id="root">
             <children>
-                <node id="Dependencies">
-                    <children>
-                        <node id="ModuleShortDesc">
-                            <attribute id="Folder" value="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4" type="30" />
-                            <attribute id="MD5" value="22ab3480b1678d4797d58bb511aa4de4" type="23" />
-                            <attribute id="Name" value="Divinity: Original Sin 2" type="22" />
-                            <attribute id="UUID" value="1301db3d-1f54-4e98-9be5-5094030916e4" type="22" />
-                            <attribute id="Version" value="371465211" type="4" />
-                        </node>
-                    </children>
-                </node>
+                <node id="Dependencies" />
                 <node id="ModuleInfo">
                     <attribute id="Author" value="fireundubh" type="30" />
                     <attribute id="CharacterCreationLevelName" value="" type="22" />
@@ -59,6 +49,9 @@
                             <children>
                                 <node id="Target">
                                     <attribute id="Object" value="Story" type="22" />
+                                </node>
+                                <node id="Target">
+                                    <attribute id="Object" value="GM" type="22" />
                                 </node>
                             </children>
                         </node>
