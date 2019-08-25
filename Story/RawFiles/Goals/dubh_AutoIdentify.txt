@@ -11,7 +11,7 @@ ItemIsContainer(_Item, 1)
 AND
 CharacterIsPlayer(_Char, 1)
 AND
-ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
+IsTagged(_Item, "FIRE_LORE_Identified", 0)
 AND
 ContainerGetGoldValue(_Item, _GoldValue)
 AND
@@ -26,24 +26,34 @@ FIRE_LORE_Identify(_Char, _Item, 1);
 IF
 ItemAddedToCharacter(_Item, _Char)
 AND
-ObjectGetFlag(_Item, "FIRE_LORE_Identified", 0)
+IsTagged(_Item, "FIRE_LORE_Identified", 0)
 AND
-CharacterIsPlayer(_Char, 1)
+DB_IsPlayer(_Char)
 AND
 FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
-AND
-ItemIsContainer(_Item, _IsContainer)
 THEN
-FIRE_LORE_Identify(_Char, _Item, _IsContainer);
+FIRE_LORE_Identify(_Char, _Item, 0);
 //END_REGION
 
 //REGION Procedures
 PROC
+FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, (INTEGER)_IsContainer)
+THEN
+SetTag(_Item, "FIRE_LORE_Identified");
+
+PROC
+FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 1)
+THEN
+ContainerIdentifyAll(_Item);
+InventoryLaunchIterator(_Item, "FIRE_LORE_FlagAndIdentify", "");
+
+PROC
 FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 0)
 AND
-String(_Item, _Str)
+ItemGetGoldValue(_Item, _Value)
+AND
+_Value > 0
 THEN
-ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
 FIRE_LORE_AddToIdentifyContainer(_Char, _Item);
 
 PROC
@@ -80,22 +90,13 @@ PROC
 ProcObjectTimerFinished((ITEMGUID)_Backpack, "FIRE_Timers_RemovedIdentifyContainer")
 THEN
 ItemRemove(_Backpack);
-
-PROC
-FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 1)
-AND
-String(_Item, _Str)
-THEN
-ContainerIdentifyAll(_Item);
-ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
-InventoryLaunchIterator(_Item, "FIRE_LORE_FlagAndIdentify", "");
 //END_REGION
 
 //REGION Events
 IF
 StoryEvent((ITEMGUID)_Item, "FIRE_LORE_FlagAndIdentify")
 THEN
-ObjectSetFlag(_Item, "FIRE_LORE_Identified", 0);
+SetTag(_Item, "FIRE_LORE_Identified");
 
 IF
 StoryEvent((ITEMGUID)_Item, "FIRE_LORE_FlagAndIdentify")
@@ -138,6 +139,35 @@ AND
 DB_FIRE_LORE_LoremasterSuccess(_PartyMember)
 THEN
 NOT DB_FIRE_LORE_LoremasterSuccess(_PartyMember);
+//END_REGION
+
+//REGION Updates_FlagToTag
+IF
+StoryEvent((ITEMGUID)_Item, "FIRE_Lore_SetIdentifyFlagToTag")
+AND
+ObjectGetFlag(_Item, "FIRE_LORE_Identified", 1)
+THEN
+SetTag(_Item, "FIRE_LORE_Identified");
+
+//Items inside containers
+IF
+StoryEvent((ITEMGUID)_Item, "FIRE_Lore_SetIdentifyFlagToTag")
+AND
+IsTagged(_Item, "FIRE_LORE_Identified", 1)
+AND
+ItemIsContainer(_Item, 1)
+THEN
+InventoryLaunchIterator(_Item, "FIRE_Lore_SetIdentifyFlagToTag", "");
+//END_REGION
+
+//REGION Updates_Future_Reactivating_Updater_Script
+/*
+IF
+GlobalFlagSet("FIRE_LORE_RunUpdater")
+THEN
+GlobalClearFlag("FIRE_LORE_RunUpdater");
+SysActivateGoal("dubh_AutoIdentify_Updater"); // Reactivates the goal
+*/
 //END_REGION
 EXITSECTION
 
