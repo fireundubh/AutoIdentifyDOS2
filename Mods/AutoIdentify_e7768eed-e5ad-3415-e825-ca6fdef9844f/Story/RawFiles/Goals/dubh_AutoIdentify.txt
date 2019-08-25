@@ -1,8 +1,6 @@
 Version 1
 SubGoalCombiner SGC_AND
 INITSECTION
-//New saves don't need the update
-GlobalSetFlag("FIRE_LORE_Update_FlagToTag");
 
 KBSECTION
 //REGION When a container is opening, flag and identify items.
@@ -169,6 +167,36 @@ NOT DB_FIRE_LORE_LoremasterSuccess(_PartyMember);
 //END_REGION
 
 //REGION Updates_FlagToTag
+//New saves
+IF
+GameEventSet("GAMEEVENT_GameStarted")
+AND
+DB_StoryStarted(1)
+THEN
+DebugBreak("[FIRE:LORE] Setting flag [FIRE_LORE_Update_FlagToTag_Finished] for a new save.");
+GlobalSetFlag("FIRE_LORE_Update_FlagToTag_Finished");
+
+IF
+SavegameLoaded(_,_,_,_)
+AND
+GlobalGetFlag("FIRE_LORE_Update_FlagToTag_Finished", 0)
+THEN
+DebugBreak("[FIRE:LORE:Updater] Updating [FIRE_LORE_Identified] flagged items to tag.");
+TimerLaunch("FIRE_LORE_Update_FlagToTag", 250);
+
+IF
+TimerFinished("FIRE_LORE_Update_FlagToTag")
+AND
+DB_IsPlayer(_Char)
+THEN
+//The iterator events are handled in the main script, since this script is temporarily active.
+InventoryLaunchIterator(_Char, "FIRE_Lore_SetIdentifyFlagToTag", "");
+
+IF
+TimerFinished("FIRE_LORE_Update_FlagToTag")
+THEN
+GlobalSetFlag("FIRE_LORE_Update_FlagToTag_Finished");
+
 IF
 StoryEvent((ITEMGUID)_Item, "FIRE_Lore_SetIdentifyFlagToTag")
 AND
@@ -187,16 +215,6 @@ THEN
 InventoryLaunchIterator(_Item, "FIRE_Lore_SetIdentifyFlagToTag", "");
 //END_REGION
 
-//REGION Updates_Future_Reactivating_Updater_Script
-/*
-IF
-GlobalFlagSet("FIRE_LORE_RunUpdater")
-THEN
-GlobalClearFlag("FIRE_LORE_RunUpdater");
-SysActivateGoal("dubh_AutoIdentify_Updater"); // Reactivates the goal
-*/
-//END_REGION
-
 //REGION Debug
 IF
 TextEventSet("fire_lore_maxlore")
@@ -208,3 +226,4 @@ CharacterAddAbility(_Char, "Loremaster", 5);
 EXITSECTION
 
 ENDEXITSECTION
+ParentTargetEdge "__Start"
