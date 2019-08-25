@@ -15,7 +15,7 @@ IsTagged(_Item, "FIRE_LORE_Identified", 0)
 AND
 ContainerGetGoldValue(_Item, _GoldValue)
 AND
-_GoldValue > 0
+_GoldValue > 1
 AND
 FIRE_LORE_PartyHasHighEnoughLoremaster(_Char, 5)
 THEN
