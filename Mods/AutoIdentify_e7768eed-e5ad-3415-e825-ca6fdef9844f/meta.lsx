@@ -7,9 +7,9 @@
             <children>
                 <node id="Dependencies" />
                 <node id="ModuleInfo">
-                    <attribute id="Author" value="fireundubh" type="30" />
+                    <attribute id="Author" value="fireundubh and LaughingLeader" type="30" />
                     <attribute id="CharacterCreationLevelName" value="" type="22" />
-                    <attribute id="Description" value="When anyone in your party has Loremaster 5+, unidentified items will be automatically identified, eliminating the need for an Identifying Glass, to spend additional points on Loremaster, or to transfer unidentified items to a party member with the Loremaster ability." type="30" />
+                    <attribute id="Description" value="With Loremaster 5+, unidentified items will be automatically identified. Significantly enhanced by LaughingLeader. Patreon: patreon.com/fireundubh" type="30" />
                     <attribute id="Folder" value="AutoIdentify_e7768eed-e5ad-3415-e825-ca6fdef9844f" type="30" />
                     <attribute id="GMTemplate" value="" type="22" />
                     <attribute id="LobbyLevelName" value="" type="22" />
@@ -22,7 +22,7 @@
                     <attribute id="Tags" value="" type="30" />
                     <attribute id="Type" value="Add-on" type="22" />
                     <attribute id="UUID" value="e7768eed-e5ad-3415-e825-ca6fdef9844f" type="22" />
-                    <attribute id="Version" value="335544320" type="4" />
+                    <attribute id="Version" value="352321536" type="4" />
                     <children>
                         <node id="PublishVersion">
                             <attribute id="Version" value="908857753" type="4" />
