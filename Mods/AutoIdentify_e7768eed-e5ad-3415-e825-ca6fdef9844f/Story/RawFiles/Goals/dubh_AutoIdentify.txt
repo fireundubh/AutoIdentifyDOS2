@@ -217,6 +217,20 @@ InventoryLaunchIterator(_Item, "FIRE_Lore_SetIdentifyFlagToTag", "");
 
 //REGION Debug
 IF
+GameModeStarted(_, 1)
+AND
+NOT DB_Origins(_)
+THEN
+DB_Origins((CHARACTERGUID)S_GLO_CharacterCreationDummy_001_da072fe7-fdd5-42ae-9139-8bd4b9fca406);
+
+IF
+TextEventSet("fire_lore_spawntreasure")
+AND
+CharacterGetHostCharacter(_Char)
+THEN
+CharacterGiveReward(_Char, "CheatShieldsAllRarities", 0);
+
+IF
 TextEventSet("fire_lore_maxlore")
 AND
 CharacterGetHostCharacter(_Char)
