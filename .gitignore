@@ -47,7 +47,7 @@ Projects/*
 *.png
 *.ttf
 *.lsb
-#*.lsf
+*.lsf
 *.lsfx
 *.lsefx
 #*.lsx

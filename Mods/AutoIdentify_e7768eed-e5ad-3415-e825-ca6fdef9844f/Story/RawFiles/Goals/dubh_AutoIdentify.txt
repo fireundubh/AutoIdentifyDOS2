@@ -44,34 +44,15 @@ DebugBreak("[FIRE:LORE:Identify] Identifying container.");
 ContainerIdentifyAll(_Item);
 InventoryLaunchIterator(_Item, "FIRE_LORE_FlagAndIdentify", "");
 
-/*
-PROC
-FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 0)
-AND
-ItemGetGoldValue(_Item, _Value)
-AND
-IntegertoString(_Value, _ValStr)
-AND
-String(_Item, _ItemStr)
-AND
-StringConcatenate("[FIRE:LORE:Identify] Item [", _ItemStr, _Str1)
-AND
-StringConcatenate(_Str1, "] gold value is [", _Str2)
-AND
-StringConcatenate(_Str2, _ValStr, _Str3)
-AND
-StringConcatenate(_Str3, "]", _Msg)
-THEN
-DebugBreak(_Msg);
-*/
-
 PROC
 FIRE_LORE_Identify((CHARACTERGUID)_Char, (ITEMGUID)_Item, 0)
 THEN
 SetTag(_Item, "FIRE_LORE_Identified");
+//Event listened for in FIRE_LORE_Main.gameScript
 CharacterItemSetEvent(_Char, _Item, "FIRE_LORE_CheckRarity");
 
 //Fires if the item's rarity isn't "Common" or "Unique"
+//Fired from FIRE_LORE_Main.gameScript
 IF
 CharacterItemEvent(_Char, _Item, "FIRE_LORE_IdentifyItem")
 THEN
@@ -217,12 +198,13 @@ InventoryLaunchIterator(_Item, "FIRE_Lore_SetIdentifyFlagToTag", "");
 
 //REGION Debug
 IF
-GameModeStarted(_, 1)
+GameModeStarted(_, 1) // Only in editor mode
 AND
 NOT DB_Origins(_)
 THEN
 DB_Origins((CHARACTERGUID)S_GLO_CharacterCreationDummy_001_da072fe7-fdd5-42ae-9139-8bd4b9fca406);
 
+//Spawn unidentified treasure
 IF
 TextEventSet("fire_lore_spawntreasure")
 AND
